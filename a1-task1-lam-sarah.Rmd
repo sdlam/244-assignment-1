@@ -1,0 +1,64 @@
+---
+title: "Assignment 1 Task 1"
+author: "Sarah Lam"
+date: "1/19/2022"
+output: html_document
+---
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(here)
+library(lubridate)
+library(patchwork)
+library(cowplot)
+```
+
+For Task 1, you will read in data an .xlsx file, do some data wrangling as needed, then create two data visualizations and put them together in a finalized compound figure (e.g. using the {patchwork} package documented HERE or the {cowplot} package documented HERE).
+
+Data summary: You will explore amphibian abundance data recorded by the Sierra Lakes Inventory Project. From the Environmental Data Initiative repository: “The Sierra Lakes Inventory Project (SLIP) was a research endeavor that ran from 1995-2002 and has supported research and management of Sierra Nevada aquatic ecosystems and their terrestrial interfaces. We described the physical characteristics of and surveyed aquatic communities for >8,000 lentic water bodies in the southern Sierra Nevada, including lakes, ponds, marshes, and meadows.”
+
+Data citation: Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative. https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3
+
+Complete Task 1 in a single well-organized .Rmd. Read in the amphibian data (sierra_amphibians.xlsx), then do any wrangling necessary to create two finalized data visualizations:
+
+```{r} 
+# data wrangling, read in, create subset 
+amphibians <- read_excel(here("data", "sierra_amphibians.xlsx"))
+
+yellow_leg_frog <- amphibians %>% 
+  filter(amphibian_species == "RAMU") %>% # filter for just the frog species we want
+  filter(amphibian_life_stage != "EggMass") %>% #remove egg mass life stage since we won't graph it 
+  mutate(date_class = ymd(survey_date)) %>% #change class of survey date
+  mutate(year = year(date_class)) %>%  #pull out year from date
+  group_by(year, amphibian_life_stage) %>% #group by year and life stage
+  summarize(count = n()) #count frogs recorded at each life stage each year
+```
+
+```{r}
+# plot data
+
+ggplot(data = yellow_leg_frog, aes(x = year, y = count)) +
+  geom_line() +
+  facet_wrap(~amphibian_life_stage)
+
+ggplot(data = yellow_leg_frog, aes(x = amphibian_life_stage, y = count)) +
+  geom_col() +
+  facet_wrap(~year)
+```
+
+A graph of total mountain yellow-legged frog (Rana muscosa) count each year across all water bodies, by life stage excluding the ‘EggMass’ level. In other words, you should find the total number of adult, subadult, and tadpole yellow-legged frogs observed in the entire study region by life stage and year, but you will not use the lake ID or amphibian_location in your analyses as additional grouping variables. Hint: Convert the date to a date with the {lubridate} package, then pull just the year using the lubridate::year() function...then you can group by year to get counts. 
+
+A column graph containing total counts (over all years of the study) of combined adult and subadult endangered mountain yellow-legged frogs (Rana muscosa) observed in the 5 lakes with the greatest total observed counts. In other words, this graph will have at least 5 columns (OK to have more if there are ties), with Lake ID (these aren’t specified in the dataset for confidentiality) as the categorical label on one axis, and total yellow-legged frog counts (adult + subadult counts) in the dataset on the other axis. Make sure they’re in high-to-low or low-to-high order by total yellow-legged frog counts. You should exclude tadpoles for this graph. Note: Consider reformatting the lake ID from just a number to a label like “Lake 10025”), then use fct_reorder to convert it to an ordered factor.
+
+Combine your two graphs into a single compound figure using the {patchwork} or {cowplot} package. Add a finalized figure caption that appears below the compound figure in your knitted html. Note: You might realize once you combine your graphs into a single compound figure, you need to update the formatting (e.g. move legends or instead directly label, etc.). You should customize as necessary to make it a professional final output.
+
+For Task 1, your knitted html should show: 
+Your organized code, with clear subsections and any useful descriptive text / annotation (e.g. if you wanted to highlight this as a code example for a prospective employer). Include an overview of the data and your exploration, and a citation for the data.
+Your finalized compound figure, with a figure caption.
+Make sure to suppress any messages & warnings, but include the setup chunk to show which packages you’ve loaded.
+
+Submit your Task 1 knitted html on GauchoSpace: 
+a1_task1_lastname_firstname.html
