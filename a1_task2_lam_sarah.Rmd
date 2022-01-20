@@ -1,0 +1,59 @@
+---
+title: "Assignment 1 Task 2"
+author: "Sarah Lam"
+date: "1/19/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
+library(GGally)
+```
+
+## Overview 
+
+For Task 2, you will read in a small subset of seawater sample data from CalCOFI, then compare the performance of two competing linear regression models that predict oxygen saturation based on several physical and chemical variables, using AIC and cross validation.
+
+Data summary: You will explore the relationship between O2 saturation of seawater off California’s coast and several physical and chemical variables. From the CalCOFI site: “Since 1949, hydrographic and biological data of the California Current System have been collected on CalCOFI cruises. The 70+ year hydrographic time-series includes temperature, salinity, oxygen and phosphate observations. In 1961, nutrient analysis expanded to include silicate, nitrate and nitrite; in 1973, chlorophyll was added; in 1984, C14 primary productivity incubations were added; and in 1993, CTD profiling began.”
+
+Data citation: CalCOFI data are available for use without restriction. Data downloaded from https://calcofi.org/ccdata.html.  Accessed 1/10/2022.
+
+```{r}
+cal_seawater <- read_csv(here("data", "calcofi_seawater_samples.csv"))
+```
+
+```{r}
+cal_seawater %>% # explore variables and linearity 
+  select(o2sat:no2u_m) %>% 
+  ggpairs()
+```
+
+```{r}
+o2_lm <- lm(data = cal_seawater, o2sat ~ t_deg_c + salinity + po4u_m)
+
+o2_lm2 <- lm(data = cal_seawater, o2sat ~ t_deg_c + salinity + po4u_m + depth_m)
+```
+
+Complete Task 2 in a single well-organized .Rmd. Read in the seawater sample data (calcofi_seawaxter_samples.csv), then create and compare two multiple linear regression models:
+Oxygen saturation as a function of water temperature, salinity, and phosphate concentration
+Oxygen saturation as a function of water temp, salinity, phosphate concentration, and depth.
+For these two linear regression models, first, use AICc (in the AICcmodavg package, either AICc() or aictab())  to select the better model, making sure to consider the ∆AIC between the two models.  Then write code to perform a ten-fold cross validation on the two models, using root-mean-square error as the scoring method. Remember that your final model should be trained on the full dataset, not any of the folds.
+
+Challenge yourself (optional!) - try one or both of these:
+Explore other possible models - there may be other combinations of the available variables that provide an even better-performing model than these two.  If you identify a better performing model, report the AIC and cross validation results for your new model, along with the results for the two models listed above.  
+In the K-fold cross validation, create a nested for-loop (a for loop inside another for loop) to perform multiple iterations of your 10-fold cross validation.  Make sure to use a different indexing variable (e.g., the outer loop might start for(j in 1:n_iterations) while the inner loop might start for(i in 1:n_folds))
+
+For Task 2, your knitted html should show: 
+Your organized code, with clear subsections and any useful descriptive text / annotation (e.g. if you wanted to highlight this as a code example for a prospective employer).  Include an overview of the data and your exploration, and a citation for the data.  Suppress all warnings and messages, but show all attached packages.
+Your comparison of the two (or three?) models using an appropriate application of AIC, with the resulting AIC scores and an interpretation of how to choose the best model with this information.  Communicate results in a nicely formatted manner (in-line code chunks, kable or other formatted table, etc).
+Your comparison of the two (or three?) models using a 10-fold cross validation, with the resulting average RMSE value across all folds, and an interpretation of how to choose the better model with this information.  Communicate results in a nicely formatted manner (in-line code chunks, kable or other formatted table, etc).
+The final parameterized model (including coefficient values) expressed as a formatted equation (using equatiomatic or LaTeX).  If your two model selection methods identify different models, select the result of one method and explain why you prefer that method.
+
+Submit your Task 2 knitted html on GauchoSpace: 
+a1_task2_lastname_firstname.html
+
