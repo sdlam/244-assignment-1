@@ -13,6 +13,7 @@ library(here)
 library(janitor)
 library(kableExtra)
 library(GGally)
+library(AICcmodavg)
 ```
 
 ## Overview 
