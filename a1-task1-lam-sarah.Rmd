@@ -26,7 +26,7 @@ Data citation: Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The 
 amphibians <- read_excel(here("data", "sierra_amphibians.xlsx"), col_types = "text")
 ```
 
-```{r, fig.cap = "The figure shows the onserved counts of Mountain Yellow-Legged Frogs each years from 1995 to 2002 for each stage of the frog life cycle, tapole, subadult, and adult. All three lines follow a similar trend with an overall increase in observed counts after a decrease in 2001 and adult frogs (yellow) having the highest observed numbers."}
+```{r}
 #data wrangling
 yellow_leg_frog <- amphibians %>% 
   filter(amphibian_species == "RAMU") %>% # filter for just the frog species we want
@@ -48,7 +48,7 @@ observe_overtime <- ggplot(data = yellow_leg_frog, aes(x = year, y = count)) +
   theme_minimal()
 ```
 
-```{r, fig.cap = "The figure shows, in descending order, the 5 lakes with the highest counts of observed adult and sub adult mountain yellow-legged frogs."}
+```{r}
 # total counts by lake 
 yellow_frogs_by_lake <- amphibians %>% 
   filter(amphibian_species == "RAMU", 
@@ -76,6 +76,10 @@ count_bylake <- ggplot(data = yellow_frogs_by_lake, aes(x = lake_id, y = total_c
 observe_overtime / 
   count_bylake
 ```
+
+**Fig. 1.** Two graphs visualizing mountain yellow-legged frog populations in the Sierra Nevada region of California. The first figure (above) shows the observed counts of Mountain Yellow-Legged Frogs each years from 1995 to 2002 for each stage of the frog life cycle, tadpole, sub adult, and adult. All three lines follow a similar trend, however tadpoles(blue) clearly show the highest observed counts and the greatest variations in numbers overtime.
+The second figure (below) shows, in descending order, the 5 lakes with the highest counts of observed adult and sub adult mountain yellow-legged frogs, lake names are omitted here for confidentiality reasons.
+
 
 A column graph containing total counts (over all years of the study) of combined adult and subadult endangered mountain yellow-legged frogs (Rana muscosa) observed in the 5 lakes with the greatest total observed counts. In other words, this graph will have at least 5 columns (OK to have more if there are ties), with Lake ID (these aren’t specified in the dataset for confidentiality) as the categorical label on one axis, and total yellow-legged frog counts (adult + subadult counts) in the dataset on the other axis. Make sure they’re in high-to-low or low-to-high order by total yellow-legged frog counts. You should exclude tadpoles for this graph. Note: Consider reformatting the lake ID from just a number to a label like “Lake 10025”), then use fct_reorder to convert it to an ordered factor.
 
