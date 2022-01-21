@@ -32,9 +32,10 @@ yellow_leg_frog <- amphibians %>%
   filter(amphibian_species == "RAMU") %>% # filter for just the frog species we want
   filter(amphibian_life_stage != "EggMass") %>% #remove egg mass life stage since we won't graph it 
   mutate(date_class = ymd(survey_date)) %>% #change class of survey date
-  mutate(year = year(date_class)) %>%  #pull out year from date
+  mutate(year = year(date_class)) %>%  #pull out year from date 
+  mutate(amphibian_number = suppressWarnings(as.numeric(amphibian_number))) %>% 
   group_by(year, amphibian_life_stage) %>% #group by year and life stage
-  summarize(count = n()) #count frogs recorded at each life stage each year
+  summarize(count = sum(amphibian_number, na.rm = TRUE)) #count frogs recorded at each life stage each year
 
 # plot data
 observe_overtime <- ggplot(data = yellow_leg_frog, aes(x = year, y = count)) +
@@ -52,13 +53,18 @@ observe_overtime <- ggplot(data = yellow_leg_frog, aes(x = year, y = count)) +
 yellow_frogs_by_lake <- amphibians %>% 
   filter(amphibian_species == "RAMU", 
          amphibian_life_stage %in% c("SubAdult", "Adult")) %>% 
+  select(lake_id, amphibian_number) %>% 
+  mutate(amphibian_number = suppressWarnings(as.numeric(amphibian_number))) %>% 
   group_by(lake_id) %>% 
-  summarize(count = n()) %>% 
-  slice_max(count, n = 5) %>% 
+  summarize(total_count = sum(amphibian_number, na.rm = TRUE))  %>% 
+  slice_max(total_count, n = 5) %>% 
+  mutate(lake_id = paste('Lake', lake_id, sep = ' ', collapse = NULL)) %>% 
   mutate(lake_id = as.factor(lake_id)) %>% 
-  mutate(lake_id = fct_reorder(lake_id, desc(count)))
+  mutate(lake_id = fct_reorder(lake_id, desc(total_count))) 
   
-count_bylake <- ggplot(data = yellow_frogs_by_lake, aes(x = lake_id, y = count)) +
+ 
+  
+count_bylake <- ggplot(data = yellow_frogs_by_lake, aes(x = lake_id, y = total_count)) +
   geom_col(fill = "gold3") +
   labs(x = "Lake Identification Label",
        y = "Number of Frogs Observed",
