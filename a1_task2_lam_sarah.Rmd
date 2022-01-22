@@ -1,12 +1,11 @@
 ---
 title: "Assignment 1 Task 2"
 author: "Sarah Lam"
-date: "1/19/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, waring = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(tidyverse)
 library(here)
@@ -17,11 +16,9 @@ library(AICcmodavg)
 library(equatiomatic)
 ```
 
-## Overview 
+#### Overview 
 
-For Task 2, you will read in a small subset of seawater sample data from CalCOFI, then compare the performance of two competing linear regression models that predict oxygen saturation based on several physical and chemical variables, using AIC and cross validation.
-
-Data summary: You will explore the relationship between O2 saturation of seawater off California’s coast and several physical and chemical variables. From the CalCOFI site: “Since 1949, hydrographic and biological data of the California Current System have been collected on CalCOFI cruises. The 70+ year hydrographic time-series includes temperature, salinity, oxygen and phosphate observations. In 1961, nutrient analysis expanded to include silicate, nitrate and nitrite; in 1973, chlorophyll was added; in 1984, C14 primary productivity incubations were added; and in 1993, CTD profiling began.”
+This code explores the relationship between O2 saturation of seawater off California’s coast and several physical and chemical variables using data from CalCOFI to compare competing linear regression models using AIC and cross validation. 
 
 Data citation: CalCOFI data are available for use without restriction. Data downloaded from https://calcofi.org/ccdata.html.  Accessed 1/10/2022.
 
@@ -29,34 +26,37 @@ Data citation: CalCOFI data are available for use without restriction. Data down
 cal_seawater <- read_csv(here("data", "calcofi_seawater_samples.csv"))
 ```
 
-```{r}
+```{r, include = FALSE}
 cal_seawater %>% # explore variables and linearity 
   select(o2sat:no2u_m) %>% 
   ggpairs()
 ```
+
+#### Linear Regression Models 
 
 ```{r}
 o2_f1 <- o2sat ~ t_deg_c + salinity + po4u_m
 
 o2_f2 <- o2sat ~ t_deg_c + salinity + po4u_m + depth_m
 
-o2_lm <- lm(data = cal_seawater, o2_f1)
+o2_lm1 <- lm(data = cal_seawater, o2_f1)
 
 o2_lm2 <- lm(data = cal_seawater, o2_f2)
 ```
 
-Complete Task 2 in a single well-organized .Rmd. Read in the seawater sample data (calcofi_seawaxter_samples.csv), then create and compare two multiple linear regression models:
-Oxygen saturation as a function of water temperature, salinity, and phosphate concentration
-Oxygen saturation as a function of water temp, salinity, phosphate concentration, and depth.
-For these two linear regression models, first, use AICc (in the AICcmodavg package, either AICc() or aictab())  to select the better model, making sure to consider the ∆AIC between the two models.  Then write code to perform a ten-fold cross validation on the two models, using root-mean-square error as the scoring method. Remember that your final model should be trained on the full dataset, not any of the folds.
+##### Aikake Index Coeffieicnt 
 
 ```{r}
 #AIC 
-AICc(o2_lm1) #corrrected AIC, in AICcmodavg pkg
+AICc(o2_lm1) #corrected AIC, in AICcmodavg pkg
 AICc(o2_lm2)
  
-aictab(list(o2_lm1, o2_lm2))
+aictab <- aictab(list(o2_lm1, o2_lm2))
 ```
+
+Based on the AICc values, the second linear regression model (`r round(aictab$AICc[1], 2)`) is a better model than the first linear regession model (`r round(aictab$AICc[2], 2)`). The difference in AICcs is `r round(aictab$AICc[2] - aictab$AICc[1], 2)`. This reveals that the added parameter of depth significantly imporved the model's fit compared to a model omitting depth as a parameter.
+
+##### K-fold Cross Validation
 
 ```{r}
 #k-fold cross validation
@@ -69,101 +69,57 @@ o2_seawater_fold <- cal_seawater %>%
   mutate(group = sample(fold_vec, size = n(), replace = FALSE))
 table(o2_seawater_fold$group)
  
-### first fold
+# code the first fold
 test_df <- o2_seawater_fold %>%
   filter(group == 1)
  
 train_df <- o2_seawater_fold %>%
   filter(group != 1)
 
+#store root mean square error for later predicting which model predicts better
 calc_rmse <- function(x, y) {
   rmse <- (x - y)^2 %>% mean() %>% sqrt()
   return(rmse)
 }
-```
 
-Use the training dataset to create two linear models, based on models 1 and 3 from earlier.
-```{r}
-training_mdl1 <- lm(f1, data = train_df)
-# summary(training_mdl2)
-# Coefficients:
-#                  Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)       -953.35     355.68  -2.680  0.00782 ** 
-# bill_depth_mm      252.56      19.25  13.119  < 2e-16 ***
-# speciesChinstrap    35.47      59.18   0.599  0.54944    
-# speciesGentoo     2259.64      83.25  27.143  < 2e-16 ***
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 362 on 262 degrees of freedom
-# Multiple R-squared:  0.8011,	Adjusted R-squared:  0.7988 
-# F-statistic: 351.7 on 3 and 262 DF,  p-value: < 2.2e-16
- 
-training_mdl2 <- lm(f2, data = train_df)
-# summary(training_mdl3)
-# Coefficients:
-#                    Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)       -4174.017    653.157  -6.391 7.52e-10 ***
-# flipper_length_mm    41.333      3.427  12.060  < 2e-16 ***
-# speciesChinstrap   -164.050     63.690  -2.576  0.01055 *  
-# speciesGentoo       279.306    105.448   2.649  0.00857 ** 
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 373.7 on 262 degrees of freedom
-# Multiple R-squared:  0.788,	Adjusted R-squared:  0.7856 
-# F-statistic: 324.7 on 3 and 262 DF,  p-value: < 2.2e-16
-training_lm3 <- lm(f3, data = train_df)
-```
+#create linear models using training dataset 
+training_mdl1 <- lm(o2_f1, data = train_df)
+training_mdl2 <- lm(o2_f2, data = train_df)
 
-Now use these models to predict the mass of penguins in our testing dataset, then use our RMSE function to see how well the predictions went.
-
-```{r}
+#use models to predict o2 concentration in test dataset
 predict_test <- test_df %>%
   mutate(model1 = predict(training_mdl1, test_df),
-         model2 = predict(training_mdl2, test_df),
-         model3 = predict(training_mdl3, test_df)) 
- 
+         model2 = predict(training_mdl2, test_df))
+
+#Use root means to determine better model
 rmse_predict_test <- predict_test %>%
-  summarize(rmse_mdl1 = calc_rmse(model1, mass),
-            rmse_mdl2 = calc_rmse(model2, mass),
-            rmse_mdl3 = calc_rmse(model3, mass))
+  summarize(rmse_mdl1 = calc_rmse(model1, o2sat),
+            rmse_mdl2 = calc_rmse(model2, o2sat))
  
 rmse_predict_test
-#   rmse_mdl1 rmse_mdl2 rmse_mdl3
-#       <dbl>     <dbl>     <dbl>
-# 1      326.      319.      327.
 ```
 
-Quite a difference, and generally agrees with the AIC results.
-
-But now, let's up the game to K-fold cross validation.  We already assigned 10 groups, so we will do 5-fold cross validation.  Let's iterate for each group to have a turn being the testing data, using the other groups as training.
-
 ```{r}
+# train model on whole dataset rather than just a single fold
 rmse_df <- data.frame()
  
 for(i in 1:folds) {
   # i <- 1
-  kfold_test_df <- penguins_fold %>%
+  kfold_test_df <- o2_seawater_fold %>%
     filter(group == i)
-  kfold_train_df <- penguins_fold %>%
+  kfold_train_df <- o2_seawater_fold %>%
     filter(group != i)
   
-  kfold_mdl1 <- lm(f1, data = kfold_train_df)
-  kfold_mdl2 <- lm(f2, data = kfold_train_df)
-  kfold_mdl3 <- lm(f3, data = kfold_train_df)
-  
-  ### NOTE: we can use a '.' to indicate the object piped into this
-  ### function.  This is a handy shortcut for tidyverse stuff, but could
-  ### also just call the object itself.
+  kfold_mdl1 <- lm(o2_f1, data = kfold_train_df)
+  kfold_mdl2 <- lm(o2_f2, data = kfold_train_df)
+ 
+
   kfold_pred_df <- kfold_test_df %>%
     mutate(mdl1 = predict(kfold_mdl1, kfold_test_df),
-           mdl2 = predict(kfold_mdl2, .),
-           mdl3 = predict(kfold_mdl3, .))
+           mdl2 = predict(kfold_mdl2, .)) 
   kfold_rmse <- kfold_pred_df %>%
-    summarize(rmse_mdl1 = calc_rmse(mdl1, mass),
-              rmse_mdl2 = calc_rmse(mdl2, mass),
-              rmse_mdl3 = calc_rmse(mdl3, mass),
+    summarize(rmse_mdl1 = calc_rmse(mdl1, o2sat),
+              rmse_mdl2 = calc_rmse(mdl2, o2sat),
               test_gp = i)
   
   rmse_df <- bind_rows(rmse_df, kfold_rmse)
@@ -173,36 +129,18 @@ rmse_df
  
 rmse_df %>% 
   summarize(mean_rmse_mdl1 = mean(rmse_mdl1),
-            mean_rmse_mdl2 = mean(rmse_mdl2),
-            mean_rmse_mdl3 = mean(rmse_mdl3))
+            mean_rmse_mdl2 = mean(rmse_mdl2))
 ```
 
-Here we see that model 3 does a slightly better job of predicting body mass (lower error) than model 2.  For our purposes, prediction of unseen data is more important than fitting to already-seen data.
-
-# Once a model is chosen, use the whole dataset to parameterize
+Bases on the results of the 10-fold cross validation, we see that model 2 does a slightly better job of predicting oxygen saturation (lower error) than model 1, this aligns with out AIC results as well.
 
 Here the various models are very close in performance.  Which to use?  AIC and cross-validation both indicate model 2, though this isn't always the case.  If you're using your model to predict on new data, CV is probably the better way to go, though if your data set is small, AIC is probably better.
 
 So we will use the entire dataset, rather than testing/training sets, to identify the coefficients for the final predictive model, based on model 2.  We already did this earlier, but let's do it again just to make the point.
 
 ```{r}
-final_mdl <- lm(f2, data = penguins_clean)
+final_mdl <- lm(o2_f2, data = cal_seawater)
 summary(final_mdl)
-# Coefficients:
-#                   Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)      -1460.995    571.308  -2.557 0.011002 *  
-# bill_l              18.204      7.106   2.562 0.010864 *  
-# bill_d              67.218     19.742   3.405 0.000745 ***
-# flip_l              15.950      2.910   5.482 8.44e-08 ***
-# speciesChinstrap  -251.477     81.079  -3.102 0.002093 ** 
-# speciesGentoo     1014.627    129.561   7.831 6.85e-14 ***
-# sexmale            389.892     47.848   8.148 7.97e-15 ***
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 287.3 on 326 degrees of freedom
-# Multiple R-squared:  0.875,	Adjusted R-squared:  0.8727 
-# F-statistic: 380.2 on 6 and 326 DF,  p-value: < 2.2e-16
 ```
 
 Our final model:
@@ -210,20 +148,4 @@ Our final model:
 
 and with coefficients in place:
 `r equatiomatic::extract_eq(final_mdl, wrap = TRUE, use_coefs = TRUE)`
-
-
-
-
-Challenge yourself (optional!) - try one or both of these:
-Explore other possible models - there may be other combinations of the available variables that provide an even better-performing model than these two.  If you identify a better performing model, report the AIC and cross validation results for your new model, along with the results for the two models listed above.  
-In the K-fold cross validation, create a nested for-loop (a for loop inside another for loop) to perform multiple iterations of your 10-fold cross validation.  Make sure to use a different indexing variable (e.g., the outer loop might start for(j in 1:n_iterations) while the inner loop might start for(i in 1:n_folds))
-
-For Task 2, your knitted html should show: 
-Your organized code, with clear subsections and any useful descriptive text / annotation (e.g. if you wanted to highlight this as a code example for a prospective employer).  Include an overview of the data and your exploration, and a citation for the data.  Suppress all warnings and messages, but show all attached packages.
-Your comparison of the two (or three?) models using an appropriate application of AIC, with the resulting AIC scores and an interpretation of how to choose the best model with this information.  Communicate results in a nicely formatted manner (in-line code chunks, kable or other formatted table, etc).
-Your comparison of the two (or three?) models using a 10-fold cross validation, with the resulting average RMSE value across all folds, and an interpretation of how to choose the better model with this information.  Communicate results in a nicely formatted manner (in-line code chunks, kable or other formatted table, etc).
-The final parameterized model (including coefficient values) expressed as a formatted equation (using equatiomatic or LaTeX).  If your two model selection methods identify different models, select the result of one method and explain why you prefer that method.
-
-Submit your Task 2 knitted html on GauchoSpace: 
-a1_task2_lastname_firstname.html
 

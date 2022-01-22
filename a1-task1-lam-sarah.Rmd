@@ -1,7 +1,6 @@
 ---
 title: "Assignment 1 Task 1"
 author: "Sarah Lam"
-date: "1/14/2022"
 output: html_document
 ---
 
@@ -17,7 +16,7 @@ library(cowplot)
 
 ## Overview
 
-Data summary: You will explore amphibian abundance data recorded by the Sierra Lakes Inventory Project. From the Environmental Data Initiative repository: “The Sierra Lakes Inventory Project (SLIP) was a research endeavor that ran from 1995-2002 and has supported research and management of Sierra Nevada aquatic ecosystems and their terrestrial interfaces. We described the physical characteristics of and surveyed aquatic communities for >8,000 lentic water bodies in the southern Sierra Nevada, including lakes, ponds, marshes, and meadows.”
+This code explores amphibian abundance data recorded by the Sierra Lakes Inventory Project (SLIP) from 1995-2000. This code focuses on Rana Muscosa, or mountain yellow-legged frog, abundance over of the five year time frame and across the major amphibian life stages. For this purposes of this data visualization, both dead and alive observed specimens have been accounted for under the assumption that dead specimens were recently deceased and because the dead observations were a small proportion of observed individuals. 
 
 Data citation: Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative. https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3
 
@@ -79,16 +78,3 @@ observe_overtime /
 
 **Fig. 1.** Two graphs visualizing mountain yellow-legged frog populations in the Sierra Nevada region of California. The first figure (above) shows the observed counts of Mountain Yellow-Legged Frogs each years from 1995 to 2002 for each stage of the frog life cycle, tadpole, sub adult, and adult. All three lines follow a similar trend, however tadpoles(blue) clearly show the highest observed counts and the greatest variations in numbers overtime.
 The second figure (below) shows, in descending order, the 5 lakes with the highest counts of observed adult and sub adult mountain yellow-legged frogs, lake names are omitted here for confidentiality reasons.
-
-
-A column graph containing total counts (over all years of the study) of combined adult and subadult endangered mountain yellow-legged frogs (Rana muscosa) observed in the 5 lakes with the greatest total observed counts. In other words, this graph will have at least 5 columns (OK to have more if there are ties), with Lake ID (these aren’t specified in the dataset for confidentiality) as the categorical label on one axis, and total yellow-legged frog counts (adult + subadult counts) in the dataset on the other axis. Make sure they’re in high-to-low or low-to-high order by total yellow-legged frog counts. You should exclude tadpoles for this graph. Note: Consider reformatting the lake ID from just a number to a label like “Lake 10025”), then use fct_reorder to convert it to an ordered factor.
-
-Combine your two graphs into a single compound figure using the {patchwork} or {cowplot} package. Add a finalized figure caption that appears below the compound figure in your knitted html. Note: You might realize once you combine your graphs into a single compound figure, you need to update the formatting (e.g. move legends or instead directly label, etc.). You should customize as necessary to make it a professional final output.
-
-For Task 1, your knitted html should show: 
-Your organized code, with clear subsections and any useful descriptive text / annotation (e.g. if you wanted to highlight this as a code example for a prospective employer). Include an overview of the data and your exploration, and a citation for the data.
-Your finalized compound figure, with a figure caption.
-Make sure to suppress any messages & warnings, but include the setup chunk to show which packages you’ve loaded.
-
-Submit your Task 1 knitted html on GauchoSpace: 
-a1_task1_lastname_firstname.html
