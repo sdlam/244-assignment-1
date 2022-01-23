@@ -44,7 +44,7 @@ o2_lm1 <- lm(data = cal_seawater, o2_f1)
 o2_lm2 <- lm(data = cal_seawater, o2_f2)
 ```
 
-##### Aikake Index Coeffieicnt 
+##### Akaike Information Criterion 
 
 ```{r}
 #AIC 
@@ -54,7 +54,7 @@ AICc(o2_lm2)
 aictab <- aictab(list(o2_lm1, o2_lm2))
 ```
 
-Based on the AICc values, the second linear regression model (`r round(aictab$AICc[1], 2)`) is a better model than the first linear regession model (`r round(aictab$AICc[2], 2)`). The difference in AICcs is `r round(aictab$AICc[2] - aictab$AICc[1], 2)`. This reveals that the added parameter of depth significantly imporved the model's fit compared to a model omitting depth as a parameter.
+Based on the AICc values, the second linear regression model (`r round(aictab$AICc[1], 2)`) is a better model than the first linear regression model (`r round(aictab$AICc[2], 2)`). The difference in AICcs is `r round(aictab$AICc[2] - aictab$AICc[1], 2)`. This reveals that the added parameter of depth significantly imporved the model's fit compared to a model omitting depth as a parameter.
 
 ##### K-fold Cross Validation
 
@@ -126,13 +126,14 @@ for(i in 1:folds) {
 }
  
 rmse_df
- 
+
+#root means for each model to assess superiority 
 rmse_df %>% 
   summarize(mean_rmse_mdl1 = mean(rmse_mdl1),
             mean_rmse_mdl2 = mean(rmse_mdl2))
 ```
 
-Bases on the results of the 10-fold cross validation, we see that model 2 does a slightly better job of predicting oxygen saturation (lower error) than model 1, this aligns with out AIC results as well.
+Based on the results of the 10-fold cross validation, we see that model 2 does a slightly better job of predicting oxygen saturation (lower error) than model 1, this aligns with out AIC results as well.
 
 Here the various models are very close in performance.  Which to use?  AIC and cross-validation both indicate model 2, though this isn't always the case.  If you're using your model to predict on new data, CV is probably the better way to go, though if your data set is small, AIC is probably better.
 

@@ -11,12 +11,11 @@ library(readxl)
 library(here)
 library(lubridate)
 library(patchwork)
-library(cowplot)
 ```
 
 ## Overview
 
-This code explores amphibian abundance data recorded by the Sierra Lakes Inventory Project (SLIP) from 1995-2000. This code focuses on Rana Muscosa, or mountain yellow-legged frog, abundance over of the five year time frame and across the major amphibian life stages. For this purposes of this data visualization, both dead and alive observed specimens have been accounted for under the assumption that dead specimens were recently deceased and because the dead observations were a small proportion of observed individuals. 
+This code explores amphibian abundance data recorded by the Sierra Lakes Inventory Project (SLIP) from 1995-2000. This code focuses on <i>Rana Muscosa</i>, or mountain yellow-legged frog, abundance over of the five year time frame and across the major amphibian life stages. For this purposes of this data visualization, both dead and alive observed specimens have been accounted for under the assumption that dead specimens were recently deceased and because the dead observations were a small proportion of observed individuals. 
 
 Data citation: Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative. https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3
 
